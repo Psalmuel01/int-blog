@@ -1,16 +1,26 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./pages/Home";
 import Header from "./components/Header";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { base, sepolia } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
-import Home from "./components/Home";
 
-const { chains, publicClient } = configureChains(
-  [base, sepolia],
+import { connect, fetchEnsName } from "@wagmi/core";
+import { InjectedConnector } from "wagmi/connectors/injected";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
+
+import Post from "./pages/Post";
+import PostFull from "./pages/PostFull";
+import { WagmiWrite } from "./helpers/WagmiWrite";
+
+const { chains, publicClient, webSocketPublicClient } = configureChains(
+  [sepolia],
   [
     alchemyProvider({ apiKey: "Zi_F-3fTztPtozvm58nBdd21noBes10h" }),
     publicProvider(),
@@ -21,22 +31,46 @@ const { connectors } = getDefaultWallets({
   projectId: "082cc0ea987ee9c208e2e9946db7184b",
   chains,
 });
-const wagmiConfig = createConfig({
+const config = createConfig({
   autoConnect: true,
   connectors,
   publicClient,
+  webSocketPublicClient,
 });
+
+// const { address } = await connect({
+//   connector: new InjectedConnector(),
+// });
+// const ensName = await fetchEnsName({ address });
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/post",
+    element: <Post />,
+  },
+  {
+    path: "/post/:postId",
+    element: <PostFull />,
+  },
+]);
 
 function App() {
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider coolMode chains={chains}>
-        <Header />
-        <main>
-          <Home />
-        </main>
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <div>
+      <WagmiConfig config={config}>
+        <RainbowKitProvider coolMode chains={chains}>
+          <ToastContainer />
+          <div className="relative isolate px-6 pt-6 lg:px-8">
+            <Header />
+            <RouterProvider router={router} />
+          </div>
+        </RainbowKitProvider>
+      </WagmiConfig>
+    </div>
   );
 }
 
