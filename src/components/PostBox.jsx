@@ -4,10 +4,11 @@ import lightOrDarkImage from "@check-light-or-dark/image";
 import icon from "../assets/icons8-tip.gif";
 import { shortenAccount } from "../utils";
 import TipUser from "./TipUser";
-import { formatEther } from "ethers";
-import { useContractRead } from "wagmi";
-import { inkAddress } from "../constants/contract";
+import { ethers, formatEther, parseEther } from "ethers";
+import { useContractRead, useContractWrite } from "wagmi";
+import { inkAddress, inkTokenAddress } from "../constants/contract";
 import { inkAbi } from "../abi/ink";
+import { inkTokenAbi } from "../abi/inktoken";
 
 const PostBox = ({ param }) => {
   // const post = usePost(param);
@@ -16,6 +17,24 @@ const PostBox = ({ param }) => {
   const imgSrc = `https://picsum.photos/1500?random=${param}`;
   const divStyle = {
     background: `url(${imgSrc})`,
+  };
+
+  const {
+    data: erc,
+    error: ercError,
+    isLoading: ercLoading,
+    isSucess: ercSuccess,
+    write: approve,
+  } = useContractWrite({
+    address: inkTokenAddress,
+    abi: inkTokenAbi,
+    functionName: "approve",
+    args: [inkAddress, parseEther("100000")],
+  });
+
+  const handleApprove = () => {
+    approve?.();
+    console.log({ erc, ercError, ercLoading, ercSuccess, approve });
   };
 
   const {
@@ -45,6 +64,8 @@ const PostBox = ({ param }) => {
       style={divStyle}
       className="bg-center bg-no-repeat bg-gray-700 bg-blend-multiply"
     >
+      <button onClick={handleApprove}>Approve</button>
+
       <div className="px-4 mx-auto max-w-screen-xl text-center py-24 lg:py-56">
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl lg:text-6xl">
           {post?.content}
@@ -64,11 +85,11 @@ const PostBox = ({ param }) => {
               alt="donate"
             />
             <p className="font-semibold text-black">
-              {formatEther(post?.tips)} ETH
+              {(post?.tips)} ETH
             </p>
           </div>
           <div>
-            <TipUser address={post?.poster} postId={param} />
+            <TipUser address={post?.poster} postId={post?.id} />
           </div>
           {/* <p className="py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-neutral-950 hover:bg-neutral-900">
               Tip

@@ -10,23 +10,33 @@ import {
 // import useTip from "../hooks/useTip";
 // import useApprove from "../hooks/useApprove";
 import { toast } from "react-toastify";
-import { formatEther, parseEther } from "ethers";
 import { inkAddress } from "../constants/contract";
 import { inkAbi } from "../abi/ink";
 import { useDebounce } from "use-debounce";
+import { getContract } from "viem";
 // import { useConnection } from "../context/connection";
 // import { supportedChains } from "../constants";
 // import { parseEther } from "ethers";
 
 const TipUser = ({ address, postId }) => {
   let [isOpen, setIsOpen] = useState(false);
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState();
   const debouncedAmount = useDebounce(amount, 1000);
 
   // const [address, setAddress] = useState("");
   // const [postId, setPostId] = useState("");
   const [tippingUser, setTippingUser] = useState(false);
   // const approve = useApprove();
+
+  // const { data: walletClient } = useWalletClient();
+  // const contract = getContract({
+  //   address: inkTokenAddress,
+  //   abi: inkTokenAbi,
+  //   walletClient,
+  // })
+  // console.log({contract, walletClient});
+  // contract.approve(inkAddress, formatEther(100000))
+  // data, isLoading, isSuccess, write
 
   const {
     config,
@@ -35,8 +45,8 @@ const TipUser = ({ address, postId }) => {
   } = usePrepareContractWrite({
     address: inkAddress,
     abi: inkAbi,
-    functionName: "tipOnPst",
-    args: [address, parseEther(debouncedAmount[0]), postId],
+    functionName: "tipOnPost",
+    args: [address, parseInt(debouncedAmount[0]), postId],
     enabled: Boolean(debouncedAmount),
   });
   const { data: create, error, isError, write } = useContractWrite(config);
@@ -46,7 +56,7 @@ const TipUser = ({ address, postId }) => {
   });
 
   console.log({ prepareError, error });
-  
+
   function closeModal() {
     setIsOpen(false);
   }
@@ -55,10 +65,10 @@ const TipUser = ({ address, postId }) => {
   }
 
   const handleTip = async () => {
-    if (!amount || !address || !postId) return toast.info("Fill all details");
+    if (!amount) return toast.info("Fill all details");
     // if (!useAccount) return toast.warning("Please connect");
     write?.();
-    console.log({address, postId, amount, debouncedAmount});
+    console.log({ address, postId, amount, debouncedAmount });
     // console.log(parseEther(debouncedAmount[0]));
     // setTippingUser(true);
     // isLoading && setAmount("");
@@ -102,7 +112,6 @@ const TipUser = ({ address, postId }) => {
       >
         Tip User
       </button>
-
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={closeModal}>
           <Transition.Child
