@@ -6,22 +6,18 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-// import { contract, inkAddress } from "../constants/contract";
 import { toast } from "react-toastify";
 import { inkAbi } from "../abi/ink";
 import { inkAddress } from "../constants/contract";
 import { useDebounce } from "use-debounce";
-// import useProposeCampaign from "../hooks/useProposeCampaign";
-// import { useConnection } from "../context/connection";
-// import { supportedChains } from "../constants";
-// import { parseEther } from "ethers";
 
 const CreatePost = () => {
+  const { isConnected } = useAccount();
   let [isOpen, setIsOpen] = useState(false);
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const debouncedTitle = useDebounce(title, 500);
   const debouncedContent = useDebounce(content, 500);
-
-  // const [isLoading, setisLoading] = useState(false);
 
   const {
     config,
@@ -31,8 +27,8 @@ const CreatePost = () => {
     address: inkAddress,
     abi: inkAbi,
     functionName: "createPost",
-    args: [debouncedContent[0]],
-    enabled: Boolean(debouncedContent),
+    args: [debouncedTitle[0], debouncedContent[0]],
+    enabled: Boolean(debouncedTitle || debouncedContent),
   });
   const { data: create, error, isError, write } = useContractWrite(config);
 
@@ -41,7 +37,6 @@ const CreatePost = () => {
   });
 
   console.log({ prepareError, error });
-  console.log(debouncedContent);
   function closeModal() {
     setIsOpen(false);
   }
@@ -50,45 +45,28 @@ const CreatePost = () => {
   }
 
   const handlePost = () => {
-    if (!content) return toast.info("Content cannot be empty");
-    // if (!useAccount) return toast.warning("Please connect");
-    console.log({ content, debouncedContent });
+    if (!title || !content) return toast.info("Either fields cannot be empty");
+    if (!isConnected) return toast.warning("Please connect");
+    console.log({ debouncedTitle, debouncedContent });
     write?.();
     isLoading && setContent("");
-    if (isPrepareError || isError) {
+    (isPrepareError || isError) &&
       toast.error("Something went wrong", {
-        error: (prepareError || error)?.message,
+        error: (prepareError || error)?.cause.reason,
       });
-    }
-    if (isSuccess) {
+    //error message not showing
+    if (isSuccess === true) {
       toast.success("Post created!");
-      closeModal();
     }
-
-    // try {
-    //   setContent("");
-    //   setisLoading(true);
-    //   const create = await contract.createPost(content);
-    //   const receipt = await create.wait();
-    //   if (receipt.status === 0) return toast.error("Transaction failed");
-    //   toast.success("Post created");
-    // } catch (error) {
-    //   console.log("error:", error); //see for yourself
-    //   if (error.info.error.code === 4001) {
-    //     return toast.error("You rejected the request");
-    //   }
-    //   toast.error("Something went wrong");
-    // } finally {
-    //   setisLoading(false);
-    //   closeModal();
-    // }
+    closeModal(); //check here, then inside isSuccess
+    //success message and close model not working
   };
 
   return (
     <Fragment>
       <button
         onClick={openModal}
-        className="fixed w-[fit-content] block rounded-md mx-auto mt-6 bg-neutral-800 px-4 py-2 text font-medium text-white hover:bg-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+        className="w-[fit-content] block rounded-md mx-auto mt-6 bg-neutral-800 px-4 py-2 text font-medium text-white hover:bg-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
       >
         Create Post
       </button>
@@ -131,6 +109,17 @@ const CreatePost = () => {
                     </p>
                   </div>
                   <form className="mt-4 space-y-4">
+                    <div className="flex flex-col">
+                      <label className="font-bold">Title</label>
+                      <input
+                        value={title}
+                        onChange={(e) => {
+                          setTitle(e.target.value);
+                        }}
+                        type="text"
+                        className="outline-0 py-2 px-1 rounded-lg mt-2 border border-neutral-500"
+                      />
+                    </div>
                     <div className="flex flex-col">
                       <label className="font-bold">Content</label>
                       <textarea

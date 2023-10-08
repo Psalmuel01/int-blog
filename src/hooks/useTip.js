@@ -11,12 +11,6 @@ const useTip = () => {
     async (address, amount, postId) => {
       console.log({ amount });
       if (!isConnected) return;
-      //   if (!campaignLength) return;
-      //   if (Number(id) > campaignLength)
-      // //     return toast.error("campaign does not exist");
-      //   {
-      //     value: amount,
-      //   }
       return contract.tipOnPost(address, amount, Number(postId));
     },
     [isConnected]
@@ -26,3 +20,10 @@ const useTip = () => {
 };
 
 export default useTip;
+
+//   if (!campaignLength) return;
+//   if (Number(id) > campaignLength)
+// //     return toast.error("campaign does not exist");
+//   {
+//     value: amount,
+//   }

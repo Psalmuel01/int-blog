@@ -5,7 +5,6 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-// import { contract } from "../constants/contract";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { inkAbi } from "../abi/ink";
@@ -13,7 +12,6 @@ import { inkAddress } from "../constants/contract";
 
 const Hero = () => {
   const { isConnected } = useAccount();
-  // const [isRegistering, setIsRegistering] = useState(false);
 
   const {
     config,
@@ -35,26 +33,14 @@ const Hero = () => {
     write?.();
     (isPrepareError || isError) &&
       toast.error("Something went wrong", {
-        error: (prepareError || error)?.message,
+        error: (prepareError || error)?.cause.reason,
       });
-    isSuccess && toast.success("Registered!");
+    // isSuccess && toast.success("Registered!");
+    if (isSuccess === true) {
+      toast.success("Registered!");
+    }
+    // success toast not working
   };
-
-  // try {
-  // setIsRegistering(true);
-  // const register = await contract.register();
-  // const receipt = await register.wait();
-  // if (receipt.status === 0) return toast.error("tx failed");
-  // toast.success("Registered!");
-  // } catch (error) {
-  // console.log("error: ", error);
-  // if (error.info.error.code === 4001) {
-  // return toast.error("You rejected the request");
-  // }
-  // toast.error("Something went wrong");
-  // } finally {
-  // setIsRegistering(false);
-  // }
 
   return (
     <div>
@@ -93,17 +79,16 @@ const Hero = () => {
                   occaecat fugiat aliqua.
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
-                  <a
-                    href="#"
+                  <div
                     className="rounded-md bg-neutral-950 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     onClick={handleRegister}
                   >
                     {isLoading ? "Registering..." : "Register"}
-                  </a>
-                  <a className="text-sm font-semibold leading-6 text-gray-900 border hover:border-black p-2 rounded-lg">
+                  </div>
+                  <div className="text-sm font-semibold leading-6 text-gray-900 border hover:border-black p-2 rounded-lg">
                     <Link to={"post"}>View Posts</Link>{" "}
                     {/* <span aria-hidden="true">→</span> */}
-                  </a>
+                  </div>
                 </div>
               </div>
             </div>

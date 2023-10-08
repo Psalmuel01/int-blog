@@ -1,6 +1,8 @@
 export const shortenAccount = (account) =>
   `${account.substring(0, 6)}...${account.substring(38)}`;
 
+export const shortenContent = (content) => `${content.substring(0, 150)}...`;
+
 export const formatDate = (time) => {
   const date = new Date(time * 1000);
 

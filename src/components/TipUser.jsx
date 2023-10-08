@@ -6,37 +6,16 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-// import { contract } from "../constants/contract";
-// import useTip from "../hooks/useTip";
-// import useApprove from "../hooks/useApprove";
 import { toast } from "react-toastify";
 import { inkAddress } from "../constants/contract";
 import { inkAbi } from "../abi/ink";
 import { useDebounce } from "use-debounce";
-import { getContract } from "viem";
-// import { useConnection } from "../context/connection";
-// import { supportedChains } from "../constants";
-// import { parseEther } from "ethers";
 
 const TipUser = ({ address, postId }) => {
   let [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState();
   const debouncedAmount = useDebounce(amount, 1000);
-
-  // const [address, setAddress] = useState("");
-  // const [postId, setPostId] = useState("");
-  const [tippingUser, setTippingUser] = useState(false);
-  // const approve = useApprove();
-
-  // const { data: walletClient } = useWalletClient();
-  // const contract = getContract({
-  //   address: inkTokenAddress,
-  //   abi: inkTokenAbi,
-  //   walletClient,
-  // })
-  // console.log({contract, walletClient});
-  // contract.approve(inkAddress, formatEther(100000))
-  // data, isLoading, isSuccess, write
+  const { isConnected } = useAccount();
 
   const {
     config,
@@ -65,44 +44,17 @@ const TipUser = ({ address, postId }) => {
   }
 
   const handleTip = async () => {
-    if (!amount) return toast.info("Fill all details");
-    // if (!useAccount) return toast.warning("Please connect");
+    if (!isConnected) return toast.warning("Please connect");
+    if (!amount) return toast.info("Enter an amount");
     write?.();
     console.log({ address, postId, amount, debouncedAmount });
-    // console.log(parseEther(debouncedAmount[0]));
-    // setTippingUser(true);
-    // isLoading && setAmount("");
-    // if (isPrepareError || isError) {
-    //   toast.error("Something went wrong", {
-    //     error: (prepareError || error)?.message,
-    //   });
-    // }
-    // if (isSuccess) {
-    //   toast.success("Post created!");
-    //   closeModal();
-    // }
-
-    // try {
-    //   setAmount("");
-    //   setTippingUser(true);
-
-    // const tip = await contract.tipOnPost(address, parseEther(amount), postId);
-    //   const tip = useTip(address, amount, postId);
-    //   const receipt = await tip.wait();
-    //   console.log({ tip, receipt });
-    //   if (receipt.status === 0) return toast.error("Transaction failed");
-    //   toast.success("User tipped");
-    // } catch (error) {
-    //   console.log("error:", error); //see for yourself
-    //   if (error.info.error.code === 4001) {
-    //     return toast.error("You rejected the request");
-    //   }
-    //   toast.error("Something went wrong");
-    // } finally {
-    //   setTippingUser(false);
-    //   closeModal();
-    // }
-  };
+    isLoading && setAmount("");
+    if (isPrepareError || isError) {
+      toast.error((prepareError || error)?.cause.reason);
+    } else if (isSuccess) {
+      toast.success("Poster tipped!");
+      closeModal();
+    } //check if this else if works, then apply to all?
 
   return (
     <Fragment>
@@ -165,7 +117,7 @@ const TipUser = ({ address, postId }) => {
                       onClick={handleTip}
                       className="cursor-pointer w-full rounded-md bg-neutral-800 p-3 text-sm font-medium text-white hover:bg-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 text-center"
                     >
-                      {tippingUser ? "Tipping User..." : "Tip User"}
+                      {isLoading ? "Tipping User..." : "Tip User"}
                     </div>
                   </form>
                 </Dialog.Panel>
