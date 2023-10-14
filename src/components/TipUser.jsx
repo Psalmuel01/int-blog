@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   useAccount,
   useContractWrite,
@@ -17,24 +17,18 @@ const TipUser = ({ address, postId }) => {
   const debouncedAmount = useDebounce(amount, 1000);
   const { isConnected } = useAccount();
 
-  const {
-    config,
-    error: prepareError,
-    isError: isPrepareError,
-  } = usePrepareContractWrite({
+  const { config, error: prepareError } = usePrepareContractWrite({
     address: inkAddress,
     abi: inkAbi,
     functionName: "tipOnPost",
     args: [address, parseInt(debouncedAmount[0]), postId],
     enabled: Boolean(debouncedAmount),
   });
-  const { data: create, error, isError, write } = useContractWrite(config);
+  const { data: create, error, write } = useContractWrite(config);
 
   const { isLoading, isSuccess } = useWaitForTransaction({
     hash: create?.hash,
   });
-
-  console.log({ prepareError, error });
 
   function closeModal() {
     setIsOpen(false);
@@ -43,18 +37,23 @@ const TipUser = ({ address, postId }) => {
     setIsOpen(true);
   }
 
-  const handleTip = async () => {
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Poster tipped!");
+      closeModal();
+    }
+    error && toast.error(error?.shortMessage);
+  }, [isSuccess, error]);
+
+  const handleTip = async (e) => {
+    e.preventDefault();
     if (!isConnected) return toast.warning("Please connect");
     if (!amount) return toast.info("Enter an amount");
     write?.();
-    console.log({ address, postId, amount, debouncedAmount });
     isLoading && setAmount("");
-    if (isPrepareError || isError) {
-      toast.error((prepareError || error)?.cause.reason);
-    } else if (isSuccess) {
-      toast.success("Poster tipped!");
-      closeModal();
-    } //check if this else if works, then apply to all?
+    prepareError && toast.error(prepareError?.cause.reason);
+    // console.log({ address, postId, amount, debouncedAmount });
+  };
 
   return (
     <Fragment>
@@ -113,12 +112,13 @@ const TipUser = ({ address, postId }) => {
                       />
                     </div>
                     {/* break */}
-                    <div
+                    <button
                       onClick={handleTip}
                       className="cursor-pointer w-full rounded-md bg-neutral-800 p-3 text-sm font-medium text-white hover:bg-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 text-center"
+                      disabled={isLoading}
                     >
                       {isLoading ? "Tipping User..." : "Tip User"}
-                    </div>
+                    </button>
                   </form>
                 </Dialog.Panel>
               </Transition.Child>
@@ -131,3 +131,13 @@ const TipUser = ({ address, postId }) => {
 };
 
 export default TipUser;
+
+// Extract toast notifications to a separate custom hook or component for better reusability and separation of concerns. This would avoid duplication of toast logic across components.
+
+// Add loading state handling to disable the submit button when write is loading. This improves UX.
+
+// Use React Context for sharing contract state instead of props drilling. This enhances maintainability as the app grows.
+
+// Memoize selectors like isConnected and isLoading to avoid unnecessary re-renders. This optimizes performance.
+
+// Validate form input (amount) before submitting. This strengthens input validation.

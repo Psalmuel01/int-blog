@@ -32,9 +32,7 @@ const Hero = () => {
   const handleRegister = async () => {
     write?.();
     (isPrepareError || isError) &&
-      toast.error("Something went wrong", {
-        error: (prepareError || error)?.cause.reason,
-      });
+      toast.error((prepareError || error)?.cause.reason);
     // isSuccess && toast.success("Registered!");
     if (isSuccess === true) {
       toast.success("Registered!");
@@ -80,7 +78,7 @@ const Hero = () => {
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                   <div
-                    className="rounded-md bg-neutral-950 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    className="cursor-pointer rounded-md bg-neutral-950 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     onClick={handleRegister}
                   >
                     {isLoading ? "Registering..." : "Register"}
