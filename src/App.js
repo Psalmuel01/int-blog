@@ -17,7 +17,6 @@ import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 
 import Post from "./pages/Post";
 import PostFull from "./pages/PostFull";
-import { WagmiWrite } from "./helpers/WagmiWrite";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [sepolia],
