@@ -10,11 +10,6 @@ import { sepolia } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
-import { connect, fetchEnsName } from "@wagmi/core";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-
 import Post from "./pages/Post";
 import PostFull from "./pages/PostFull";
 

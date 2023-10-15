@@ -99,7 +99,7 @@ const TipUser = ({ address, postId }) => {
                   </div>
                   <form className="mt-4 space-y-4">
                     <div className="flex flex-col">
-                      <label className="font-bold">Amount (in ETH)</label>
+                      <label className="font-bold">Amount (in SMK)</label>
                       <input
                         value={amount}
                         onChange={(e) => {

@@ -1,5 +1,4 @@
-import icon from "../assets/icons8-tip.gif";
-import { shortenAccount } from "../utils";
+// import icon from "../assets/icons8-tip.gif";
 import TipUser from "./TipUser";
 import { useContractRead, useContractWrite } from "wagmi";
 import { inkAddress, inkTokenAddress } from "../constants/contract";
